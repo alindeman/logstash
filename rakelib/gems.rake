@@ -3,7 +3,7 @@ require "rubygems/commands/install_command"
 require "logstash/JRUBY-PR1448" if RUBY_PLATFORM == "java" && Gem.win_platform?
 
 namespace "gem" do
-  task "require", :name, :requirement do |task, args|
+  task "require", :name, :requirement, :target do |task, args|
     name, requirement, target = args[:name], args[:requirement], args[:target]
     begin
       gem name, requirement
@@ -12,7 +12,7 @@ namespace "gem" do
     end
   end
 
-  task "install", :name, :requirement do |task, args|
+  task "install", :name, :requirement, :target do |task, args|
     name, requirement, target = args[:name], args[:requirement], args[:target]
     puts "Fetching and installing gem: #{name} (#{requirement})"
 
@@ -40,7 +40,7 @@ namespace "gem" do
     begin
       gem("bundler", ">=1.3.5")
     rescue Gem::LoadError => e
-      Rake::Task["gem:install"].invoke("bundler", ">= 1.3.5")
+      Rake::Task["gem:install"].invoke("bundler", ">= 1.3.5", ENV["GEM_HOME"])
     end
   end
 end # namespace "gem"
