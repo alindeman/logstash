@@ -25,7 +25,6 @@ export HOME SINCEDB_DIR
 
 case $1 in
   deps) install_deps ;;
-  env) env "$@" ;;
   -*)
     if [ -z "$VENDORED_JRUBY" ] ; then
       exec "${RUBYCMD}" "${basedir}/lib/logstash/runner.rb" "agent" "$@"
