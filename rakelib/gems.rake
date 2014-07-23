@@ -7,9 +7,12 @@ namespace "gem" do
     name, requirement, target = args[:name], args[:requirement], args[:target]
     begin
       gem name, requirement
+      puts "Gem #{name} found"
     rescue Gem::LoadError => e
+      puts "Failed to load #{name} #{requirement}: #{e}"
       Rake::Task["gem:install"].invoke(name, requirement, target)
     end
+    task.reenable # Allow this task to be run again
   end
 
   task "install", :name, :requirement, :target do |task, args|
@@ -33,14 +36,7 @@ namespace "gem" do
         raise
       end
     end
-  end # task "install"
 
-  task "bundler" do
-    # Ensure bundler is available.
-    begin
-      gem("bundler", ">=1.3.5")
-    rescue Gem::LoadError => e
-      Rake::Task["gem:install"].invoke("bundler", ">= 1.3.5", ENV["GEM_HOME"])
-    end
-  end
+    task.reenable # Allow this task to be run again
+  end # task "install"
 end # namespace "gem"
