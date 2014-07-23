@@ -16,7 +16,9 @@ end
 
 namespace "clean" do
   task "grammar" do
-    rm "build/staging/lib/logstash/config/grammar.rb"
+    "build/staging/lib/logstash/config/grammar.rb".tap do |path|
+      rm path if File.exist?(path)
+    end
   end
   task "all" => "grammar"
 end
