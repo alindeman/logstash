@@ -33,6 +33,7 @@ module LogStash
       gemdir = "#{gem_target}/#{ruby_engine}/#{gem_ruby_version}/"
       ENV["GEM_HOME"] = gemdir
       ENV["GEM_PATH"] = gemdir
+      Gem.paths = gemdir
     end
 
     # @return [String] major.minor ruby version, ex 1.9
