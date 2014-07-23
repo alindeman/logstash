@@ -3,7 +3,7 @@ def staging
   "build/staging"
 end
 
-sources = Rake::FileList["{lib,spec,locale}/**/*"]
+sources = (Rake::FileList["{lib,spec,locales}/{**/*}"] + Rake::FileList["{lib,spec,locales}"])
 
 # Create directory and file targets for everything we
 # might want to copy
@@ -15,11 +15,11 @@ sources.each do |source|
   if stat.file?
     file target => [source, target_dir] do
       cp source, target
-    end
+    end unless Rake::Task.task_defined?(target)
   elsif stat.directory?
     directory target => [target_dir] do
       mkdir target
-    end 
+    end unless Rake::Task.task_defined?(target)
   end
 end
 
@@ -30,7 +30,9 @@ end
 
 namespace "clean" do
   task "copy" do
-    sources.collect { |f| File.join(staging, f) }.select { |f| File.file?(f) }.each { |f| File.unlink(f) }
+    sources.collect { |f| File.join(staging, f) }.select { |f| File.file?(f) }.each { |f| rm f }
+
+    # FileUtils#rm doesn't support directories... use Dir.delete instead.
     sources.collect { |f| File.join(staging, f) }.select { |f| File.directory?(f) }.sort_by { |f| -f.bytesize }.each { |f| Dir.delete(f) }
   end
 
