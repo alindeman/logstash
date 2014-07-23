@@ -51,6 +51,8 @@ require "logstash/program"
 require "i18n"
 I18n.enforce_available_locales = true
 I18n.load_path << LogStash::Environment.locales_path("en.yml")
+I18n.reload!
+fail "No locale? This is a bug." if I18n.available_locales.empty?
 
 class LogStash::RSpecsRunner
   def initialize(args)
