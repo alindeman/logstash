@@ -1,16 +1,3 @@
-def fetch(url, sha1, output)
-  require "net/http"
-  require "uri"
-  require "digest/sha1"
-
-  puts "Downloading #{url}"
-  actual_sha1 = download(url, output)
-
-  if actual_sha1 != sha1
-    fail "SHA1 does not match (expected '#{sha1}' but got '#{actual_sha1}')"
-  end
-end # def fetch
-
 directory "vendor/_" => ["vendor"] do |task, args|
   mkdir task.name
 end
@@ -27,7 +14,7 @@ def file_fetch(url, sha1)
     rescue Errno::ENOENT
       fetch(url, sha1, output)
     end
-  end
+  end.invoke
 
   return output
 end
@@ -55,15 +42,19 @@ def download(url, output)
     request = Net::HTTP::Get.new(uri)
     http.request(request) do |response|
       fail "HTTP fetch failed for #{url}. #{response}" if response.code != "200"
-      response.each_header do |h,v|
-        p h => v
-      end
+      size = (response["content-length"].to_i || -1).to_f
+      count = 0
       File.open(tmp, "w") do |fd|
         response.read_body do |chunk|
           fd.write(chunk)
           digest << chunk
+          if size > 0 && $stdout.tty?
+            count += chunk.bytesize
+            $stdout.write(sprintf("\r%0.2f%%", count/size * 100))
+          end
         end
       end
+      $stdout.write("\r      \r") if $stdout.tty?
     end
   end
 
