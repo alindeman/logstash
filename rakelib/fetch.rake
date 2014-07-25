@@ -54,6 +54,10 @@ def download(url, output)
   Net::HTTP.start(uri.host, uri.port, :use_ssl => (uri.scheme == "https")) do |http|
     request = Net::HTTP::Get.new(uri)
     http.request(request) do |response|
+      fail "HTTP fetch failed for #{url}. #{response}" if response.code != "200"
+      response.each_header do |h,v|
+        p h => v
+      end
       File.open(tmp, "w") do |fd|
         response.read_body do |chunk|
           fd.write(chunk)
@@ -66,6 +70,9 @@ def download(url, output)
   File.rename(tmp, output)
 
   return digest.hexdigest
+rescue SocketError => e
+  puts "Failure while downloading #{url}: #{e}"
+  raise
 ensure
   File.unlink(tmp) if File.exist?(tmp)
 end # def download

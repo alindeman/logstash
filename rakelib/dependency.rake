@@ -31,6 +31,10 @@ namespace "dependency" do
   end # task gems
 
   task "rbx-stdlib" do
-    Rake::Task["gem:require"].execute("rubysl", ">= 0", ENV["GEM_HOME"])
+    Rake::Task["gem:require"].invoke("rubysl", ">= 0", ENV["GEM_HOME"])
   end # task rbx-stdlib
+
+  task "archive-tar-minitar" do
+    Rake::Task["gem:require"].invoke("archive-tar-minitar", ">= 0", ENV["GEM_HOME"])
+  end # task archive-minitar
 end # namespace dependency

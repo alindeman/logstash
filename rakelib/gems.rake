@@ -7,7 +7,6 @@ namespace "gem" do
     name, requirement, target = args[:name], args[:requirement], args[:target]
     begin
       gem name, requirement
-      puts "Gem #{name} found"
     rescue Gem::LoadError => e
       puts "Failed to load #{name} #{requirement}: #{e}"
       Rake::Task["gem:install"].invoke(name, requirement, target)
