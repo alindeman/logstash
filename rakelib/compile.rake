@@ -10,7 +10,10 @@ rule ".rb" => ".treetop" do |task, args|
 end
 
 namespace "build" do
+  desc "Compile the config grammar"
   task "grammar" => "build/staging/lib/logstash/config/grammar.rb"
+
+  desc "Build everything"
   task "all" => "grammar"
 end
 
