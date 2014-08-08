@@ -2,7 +2,8 @@ require "rubygems/specification"
 require "rubygems/commands/install_command"
 require "logstash/JRUBY-PR1448" if RUBY_PLATFORM == "java" && Gem.win_platform?
 
-ENV["GEM_HOME"] = ENV["GEM_PATH"] = Gem.paths = "build/bootstrap/"
+ENV["GEM_HOME"] = ENV["GEM_PATH"] = "build/bootstrap/"
+Gem.use_paths(ENV["GEM_HOME"], Gem.paths.path)
 
 file "build/bootstrap" => "build" do |task,args|
   mkdir task.name
@@ -14,7 +15,7 @@ namespace "gem" do
     begin
       gem name, requirement
     rescue Gem::LoadError => e
-      #puts "Failed to load #{name} #{requirement}: #{e}"
+      puts "Failed to load #{name} #{requirement}: #{e}"
       Rake::Task["gem:install"].invoke(name, requirement, target)
     end
     task.reenable # Allow this task to be run again

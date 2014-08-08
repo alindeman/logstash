@@ -2,6 +2,19 @@ directory "vendor/_" => ["vendor"] do |task, args|
   mkdir task.name
 end
 
+def fetch(url, sha1, output)
+  require "net/http"
+  require "uri"
+  require "digest/sha1"
+
+  puts "Downloading #{url}"
+  actual_sha1 = download(url, output)
+
+  if actual_sha1 != sha1
+    fail "SHA1 does not match (expected '#{sha1}' but got '#{actual_sha1}')"
+  end
+end # def fetch
+
 def file_fetch(url, sha1)
   filename = File.basename(URI(url).path)
   output = "vendor/_/#{filename}"
@@ -39,7 +52,7 @@ def download(url, output)
   digest = Digest::SHA1.new
   tmp = "#{output}.tmp"
   Net::HTTP.start(uri.host, uri.port, :use_ssl => (uri.scheme == "https")) do |http|
-    request = Net::HTTP::Get.new(uri)
+    request = Net::HTTP::Get.new(uri.path)
     http.request(request) do |response|
       fail "HTTP fetch failed for #{url}. #{response}" if response.code != "200"
       size = (response["content-length"].to_i || -1).to_f

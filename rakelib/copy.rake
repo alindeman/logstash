@@ -4,6 +4,7 @@ def staging
 end
 
 sources = (Rake::FileList["{bin,lib,spec,locales}/{**/*}"] + Rake::FileList["{bin,lib,spec,locales,LICENSE}"])
+sources = sources.reject { |s| s =~ /\.gitignore$/ }
 
 # Create directory and file targets for everything we
 # might want to copy

@@ -37,7 +37,7 @@ namespace "vendor" do
       #next if File.exist?(path)
       file path => parent do
         File.open(path, "w") do |fd|
-          puts "Writing #{entry.full_name} from #{download}"
+          puts "Extracting #{entry.full_name} from #{download}"
           true while fd.write(entry.read(16384)) > 0
         end
       end.invoke # File.open
@@ -64,6 +64,7 @@ namespace "vendor" do
         next unless entry.full_name == "collectd-#{version}/src/types.db"
         puts "Writing #{task.name} from #{download}"
         File.open(task.name, "w") do |fd|
+          chunk = nil
           fd.write(chunk) while chunk = entry.read(16384)
         end # File.open
       end # untar
@@ -73,11 +74,20 @@ namespace "vendor" do
   task "gems" => [ "dependency:bundler" ] do
     require "logstash/environment"
     Rake::Task["dependency:rbx-stdlib"] if LogStash::Environment.ruby_engine == "rbx"
+    Rake::Task["dependency:stud"].invoke
+
+    # Skip bundler if we've already done this recently.
+    donefile = File.join(LogStash::Environment.gem_target, ".done")
+    if File.file?(donefile) 
+      age = (Time.now - File.lstat(donefile).mtime)
+      # Skip if the donefile was last modified recently
+      next if age < 300
+    end
 
     # Try installing a few times in case we hit the "bad_record_mac" ssl error during installation.
     10.times do
       begin
-        Bundler::CLI.start(["install", "--gemfile=tools/Gemfile", "--path", LogStash::Environment.gem_target, "--clean", "--without", "development"])
+        Bundler::CLI.start(["install", "--gemfile=tools/Gemfile", "--path", LogStash::Environment.gem_target, "--clean", "--without", "development", "--jobs", 4])
         break
       rescue Gem::RemoteFetcher::FetchError => e
         puts e.message
@@ -85,6 +95,7 @@ namespace "vendor" do
         sleep 5 #slow down a bit before retry
       end
     end
+    File.write(donefile, Time.now.to_s)
   end # task gems
 
 end

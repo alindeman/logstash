@@ -19,4 +19,8 @@ namespace "dependency" do
   task "archive-tar-minitar" do
     Rake::Task["gem:require"].invoke("archive-tar-minitar", ">= 0", ENV["GEM_HOME"])
   end # task archive-minitar
+
+  task "stud" do
+    Rake::Task["gem:require"].invoke("stud", ">= 0", ENV["GEM_HOME"])
+  end # task stud
 end # namespace dependency
