@@ -24,14 +24,16 @@ namespace "vendor" do
     info = DOWNLOADS[name]
     version = info["version"]
     url = "http://jruby.org.s3.amazonaws.com/downloads/#{version}/jruby-complete-#{version}.jar"
-    download = file_fetch(url, info["sha1"])
 
+    download = file_fetch(url, info["sha1"])
     parent = vendor(name).gsub(/\/$/, "")
     directory parent => "vendor" do
       mkdir parent
     end.invoke unless Rake::Task.task_defined?(parent)
     
-    cp download, vendor(name, File.basename(download))
+    file vendor(name, File.basename(download)) do |task, args|
+      cp download, task.name
+    end.invoke
   end # jruby
 
   task "elasticsearch" do |task, args|
