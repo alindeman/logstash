@@ -2,6 +2,7 @@
 DOWNLOADS = {
   "elasticsearch" => { "version" => "1.3.0", "sha1" => "f9e02e2cdcb55e7e8c5c60e955f793f68b7dec75" },
   "collectd" => { "version" => "5.4.0", "sha1" => "a90fe6cc53b76b7bdd56dc57950d90787cb9c96e" },
+  "jruby" => { "version" => "1.7.13", "sha1" => "0dfca68810a5eed7f12ae2007dc2cc47554b4cc6" },
 }
 
 def vendor(*args)
@@ -18,13 +19,27 @@ def untar(tarball, &block)
 end # def untar
 
 namespace "vendor" do
+  task "jruby" do |task, args|
+    name = task.name.split(":")[1]
+    info = DOWNLOADS[name]
+    version = info["version"]
+    url = "http://jruby.org.s3.amazonaws.com/downloads/#{version}/jruby-complete-#{version}.jar"
+    download = file_fetch(url, info["sha1"])
+
+    parent = vendor(name).gsub(/\/$/, "")
+    directory parent => "vendor" do
+      mkdir parent
+    end.invoke unless Rake::Task.task_defined?(parent)
+    
+    cp download, vendor(name, File.basename(download))
+  end # jruby
+
   task "elasticsearch" do |task, args|
     name = task.name.split(":")[1]
     info = DOWNLOADS[name]
     version = info["version"]
-    sha1 = info["sha1"]
     url = "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-#{version}.tar.gz"
-    download = file_fetch(url, sha1)
+    download = file_fetch(url, info["sha1"])
 
     parent = vendor(name).gsub(/\/$/, "")
     directory parent => "vendor" do
@@ -34,11 +49,10 @@ namespace "vendor" do
     untar(download) do |entry|
       next unless entry.full_name =~ /\.jar$/
       path = vendor("elasticsearch", File.basename(entry.full_name))
-      #next if File.exist?(path)
       file path => parent do
+        puts "Extracting #{entry.full_name} from #{download}"
         File.open(path, "w") do |fd|
-          puts "Extracting #{entry.full_name} from #{download}"
-          true while fd.write(entry.read(16384)) > 0
+          IO.copy_stream(entry, fd)
         end
       end.invoke # File.open
     end # untar
@@ -64,8 +78,7 @@ namespace "vendor" do
         next unless entry.full_name == "collectd-#{version}/src/types.db"
         puts "Writing #{task.name} from #{download}"
         File.open(task.name, "w") do |fd|
-          chunk = nil
-          fd.write(chunk) while chunk = entry.read(16384)
+          IO.copy_stream(entry, fd)
         end # File.open
       end # untar
     end.invoke
