@@ -69,7 +69,7 @@ setup_drip() {
 }
 
 setup_vendored_jruby() {
-  JRUBY_JAR=$(ls "${basedir}"/vendor/jar/jruby-complete-*.jar)
+  JRUBY_JAR=$(ls "${basedir}"/vendor/jruby/jruby-complete-*.jar)
   VENDORED_JRUBY=1
 }
 
