@@ -29,8 +29,12 @@ module LogStash
       "#{LOGSTASH_HOME}/vendor/bundle"
     end
 
+    def gem_home
+      "#{gem_target}/#{ruby_engine}/#{gem_ruby_version}/"
+    end
+
     def set_gem_paths!
-      gemdir = "#{gem_target}/#{ruby_engine}/#{gem_ruby_version}/"
+      gemdir = gem_home
       ENV["GEM_HOME"] = gemdir
       ENV["GEM_PATH"] = gemdir
       Gem.paths = gemdir
