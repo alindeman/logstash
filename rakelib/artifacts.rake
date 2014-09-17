@@ -12,13 +12,12 @@ namespace "artifact" do
     "vendor/elasticsearch/**/*",
     "vendor/collectd/**/*",
     "vendor/jruby/**/*",
+    "vendor/kafka/**/*",
+    "vendor/geoip/**/*",
     File.join(LogStash::Environment.gem_home.gsub(Dir.pwd + "/", ""), "{gems,specifications}/**/*"),
     "Rakefile",
     "rakelib/*",
   ]
-  # TODO(sissel): vendor:geoip
-  # TODO(sissel): vendor:useragent
-  # TODO(sissel): vendor:kibana
   
   desc "Build a tar.gz of logstash with all dependencies"
   task "tar" => ["vendor:elasticsearch", "vendor:collectd", "vendor:jruby", "vendor:gems"] do
