@@ -1,6 +1,9 @@
 if RUBY_ENGINE != "jruby"
-  puts "Restarting myself under JRuby (currently #{RUBY_ENGINE} #{RUBY_VERSION})"
+  puts "Restarting myself under JRuby (currently #{RUBY_ENGINE} #{RUBY_VERSION})" if $DEBUG
+
+  # Make sure we have JRuby, then rerun ourselves under jruby.
   Rake::Task["vendor:jruby"].invoke
-  exec("java", "-jar", "vendor/jruby/jruby-complete-1.7.13.jar", "-S", "rake", *ARGV)
+  jar = File.join("vendor", "jruby", "jruby-complete-#{DOWNLOADS["jruby"]["version"]}.jar") 
+  exec("java", "-jar", jar, "-S", "rake", *ARGV)
 end
 
